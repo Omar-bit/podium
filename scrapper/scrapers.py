@@ -47,7 +47,7 @@ class NuitDelInfoScraper(WebScraper):
     def scrape_teams(self, url: str) -> Dict:
         """
         Scrape teams participating in a challenge
-        Returns: {"teams": ["team1", "team2", ...]}
+        Returns: {"teams": [{"id": "1", "name": "team1"}, ...]}
         """
         html = self.fetch_page(url)
         if not html:
@@ -65,9 +65,19 @@ class NuitDelInfoScraper(WebScraper):
         if not list_group:
             return {"error": "List group not found", "teams": []}
         
-        # Extract all team names from list-group-item links
+        # Extract all team names and IDs from list-group-item links
         team_links = list_group.find_all('a', class_='list-group-item')
-        teams = [link.text.strip() for link in team_links]
+        teams = []
+        for link in team_links:
+            team_name = link.text.strip()
+            team_url = link.get('href', '')
+            # Extract ID from URL (e.g., /inscription/equipes/1 -> 1)
+            team_id = team_url.split('/')[-1] if team_url else None
+            
+            teams.append({
+                "id": team_id,
+                "name": team_name
+            })
         
         return {
             "teams": teams,
