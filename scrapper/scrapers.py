@@ -99,12 +99,18 @@ class NuitDelInfoScraper(WebScraper):
         soup = self.parse_html(html)
         
         # Find the main panel
-        panel = soup.find('div', class_='panel-info')
+        panel = soup.find('div', class_='panel panel-info')
         if not panel:
             return {"error": "Panel not found", "team_id": team_id}
         
-        # Extract name
-        name = panel.find("panel-heading text-center").find('h1').text
+        # Extract team name
+        name = None
+        panel_heading = panel.find('div', class_='panel-heading')
+        if panel_heading:
+            h1_tag = panel_heading.find('h1')
+            if h1_tag:
+                name = h1_tag.text.strip()
+        
         # Extract members from the list-group
         members = []
         panel_body = panel.find('div', class_='panel-body')
@@ -134,7 +140,7 @@ class NuitDelInfoScraper(WebScraper):
                     })
         
         return {
-            "name": name.text.strip() if name else None,
+            "name": name,
             "members": members,
             "selectedchall": selected_challenges,
             "status": "success"
