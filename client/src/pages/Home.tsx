@@ -157,7 +157,7 @@ const Home = () => {
 
             {/* Description */}
             <p className='max-w-2xl text-muted-foreground text-lg md:text-xl leading-relaxed'>
-              Bienvenue sur la plateforme officielle du Challenge MIAGE Paris !
+              Bienvenue sur la plateforme officielle du Challenge nuitdelinfo !
               Les équipes s'affrontent pour présenter leurs solutions
               innovantes, leur excellence technique et l'intégration des bonnes
               pratiques d'accessibilité (WCAG). Découvrez les équipes
