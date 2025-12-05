@@ -1,4 +1,4 @@
-#El_Foundou_Squad_ISITCom
+El_Foundou_Squad_ISITCom
 # Podium
 
 A web scraping project with a modern React frontend and Python/FastAPI backend. This project provides a modular scraping framework with a REST API to trigger and manage scraping jobs, paired with an interactive web interface.
