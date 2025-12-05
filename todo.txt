@@ -1,3 +1,2 @@
-1-consume real API
-2-add random progress chart
-3-add random confetti
+1-add random progress chart
+2-add random confetti
