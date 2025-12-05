@@ -20,14 +20,24 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const loadTeams = async () => {
       try {
-        setIsLoading(true);
+        // Only show loading spinner on initial load
+        if (isInitialLoad) {
+          setIsLoading(true);
+        }
+
         const data = await fetchTeams();
         setTeams(data);
         setError(null);
+
+        // Mark initial load as complete
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
 
         // Start lazy loading member counts in the background
         setLoadingDetails(true);
@@ -36,7 +46,9 @@ const Home = () => {
         setError("Impossible de charger les équipes. Veuillez réessayer plus tard.");
         console.error("Failed to fetch teams:", err);
       } finally {
-        setIsLoading(false);
+        if (isInitialLoad) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -84,6 +96,16 @@ const Home = () => {
     };
 
     loadTeams();
+
+    // Refresh teams data every 10 seconds
+    const refreshInterval = setInterval(() => {
+      loadTeams();
+    }, 10000); // 10000ms = 10 seconds
+
+    // Cleanup interval on component unmount
+    return () => {
+      clearInterval(refreshInterval);
+    };
   }, []);
 
   const filteredTeams = teams.filter((team) =>
@@ -191,32 +213,32 @@ const Home = () => {
               <p className="text-red-500 text-lg">{error}</p>
             </div>
           ) : filteredTeams.length > 0 ? (
-            <Carousel
-              opts={{ align: "start", loop: true }}
-              className="w-full"
-              aria-label="Team carousel"
-            >
-              <CarouselContent className="-ml-4">
-                {filteredTeams.map((team, index) => (
-                  <CarouselItem
-                    key={team.id}
-                    className="pl-4 md:basis-1/2 lg:basis-1/3"
-                    role="group"
-                    aria-label={`Team ${team.name}, position ${index + 1}`}
-                  >
-                    <div className="p-1">
-                      <TeamCard team={team} index={index} />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
+            <div className="relative">
+              <Carousel
+                opts={{ align: "start", loop: true }}
+                className="w-full"
+                aria-label="Team carousel"
+              >
+                <CarouselContent className="-ml-4">
+                  {filteredTeams.map((team, index) => (
+                    <CarouselItem
+                      key={team.id}
+                      className="pl-4 md:basis-1/2 lg:basis-1/3"
+                      role="group"
+                      aria-label={`Team ${team.name}, position ${index + 1}`}
+                    >
+                      <div className="p-1">
+                        <TeamCard team={team} index={index} />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
 
-              {/* Carousel Controls */}
-              <div className="hidden md:flex justify-between mt-4">
-                <CarouselPrevious aria-label="Équipe précédente" />
-                <CarouselNext aria-label="Équipe suivante" />
-              </div>
-            </Carousel>
+                {/* Centered Carousel Controls */}
+                <CarouselPrevious className="hidden md:flex -left-12" aria-label="Équipe précédente" />
+                <CarouselNext className="hidden md:flex -right-12" aria-label="Équipe suivante" />
+              </Carousel>
+            </div>
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">Aucune équipe trouvée pour "{searchQuery}"</p>
