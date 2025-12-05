@@ -52,7 +52,7 @@ logs/
 
 # Scraped data
 data/
-*.json
+# *.json
 *.csv
 !example_data.json
 
