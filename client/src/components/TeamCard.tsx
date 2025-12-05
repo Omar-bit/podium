@@ -63,7 +63,12 @@ const TeamCard = ({ team, index }: TeamCardProps) => {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <Users className="w-4 h-4 text-primary/70" />
-            <span>{team.members.length} members</span>
+            <span>
+              {team.members.length > 0
+                ? `${team.members.length} members`
+                : '...'
+              }
+            </span>
           </div>
         </div>
 

@@ -1,4 +1,3 @@
-import { teams } from "@/data/teams";
 import TeamCard from "@/components/TeamCard";
 import { Trophy, Sparkles } from "lucide-react";
 
@@ -10,12 +9,82 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { fetchTeams, fetchTeamById, Team } from "@/services/api";
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    const loadTeams = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchTeams();
+        setTeams(data);
+        setError(null);
+
+        // Start lazy loading member counts in the background
+        setLoadingDetails(true);
+        loadTeamDetails(data);
+      } catch (err) {
+        setError("Impossible de charger les équipes. Veuillez réessayer plus tard.");
+        console.error("Failed to fetch teams:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const loadTeamDetails = async (initialTeams: Team[]) => {
+      const BATCH_SIZE = 10; // Load 10 teams at a time
+      const teamIds = initialTeams.map(t => t.id);
+
+      for (let i = 0; i < teamIds.length; i += BATCH_SIZE) {
+        const batch = teamIds.slice(i, i + BATCH_SIZE);
+
+        // Fetch this batch in parallel
+        const batchPromises = batch.map(async (id) => {
+          try {
+            const teamDetails = await fetchTeamById(id);
+            return teamDetails;
+          } catch (error) {
+            console.error(`Failed to fetch team ${id}:`, error);
+            return null;
+          }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+
+        // Update teams with fetched details
+        setTeams(prevTeams => {
+          const updatedTeams = [...prevTeams];
+          batchResults.forEach(teamDetail => {
+            if (teamDetail) {
+              const index = updatedTeams.findIndex(t => t.id === teamDetail.id);
+              if (index !== -1) {
+                updatedTeams[index] = teamDetail;
+              }
+            }
+          });
+          return updatedTeams;
+        });
+
+        // Small delay between batches to avoid overwhelming the API
+        if (i + BATCH_SIZE < teamIds.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      setLoadingDetails(false);
+    };
+
+    loadTeams();
+  }, []);
 
   const filteredTeams = teams.filter((team) =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -74,11 +143,9 @@ const Home = () => {
               </div>
               <div className="w-px h-12 bg-border" role="presentation" />
               <div className="text-center">
-                <dt className="sr-only">Nombre de participants</dt>
-                <dd className="font-display text-3xl font-bold text-primary">
-                  {teams.reduce((acc, team) => acc + team.members.length, 0)}
-                </dd>
-                <div className="text-muted-foreground text-sm" aria-hidden="true">Participants</div>
+                <dt className="sr-only">Defis</dt>
+                <dd className="font-display text-3xl font-bold text-primary">42</dd>
+                <div className="text-muted-foreground text-sm" aria-hidden="true">Defis</div>
               </div>
               <div className="w-px h-12 bg-border" role="presentation" />
               <div className="text-center">
@@ -112,7 +179,18 @@ const Home = () => {
             </div>
           </div>
 
-          {filteredTeams.length > 0 ? (
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" role="status">
+                <span className="sr-only">Chargement des équipes...</span>
+              </div>
+              <p className="text-muted-foreground text-lg mt-4">Chargement des équipes...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500 text-lg">{error}</p>
+            </div>
+          ) : filteredTeams.length > 0 ? (
             <Carousel
               opts={{ align: "start", loop: true }}
               className="w-full"
