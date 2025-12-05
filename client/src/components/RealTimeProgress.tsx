@@ -32,6 +32,8 @@ interface ChartDataPoint {
   [key: string]: number | string;
 }
 
+const REFRESH_DURATION = 10000; // 10 seconds
+
 const TEAM_COLORS = [
   '#22c55e', // Green
   '#ef4444', // Red
@@ -123,7 +125,7 @@ const RealTimeProgress = ({ existingteams }: { existingteams: any[] }) => {
 
         return newTime;
       });
-    }, 2000); // Update every 2 seconds
+    }, REFRESH_DURATION); // Update every 2 seconds
 
     return () => clearInterval(interval);
   }, [teams, selectedTeam]);
@@ -294,7 +296,7 @@ const RealTimeProgress = ({ existingteams }: { existingteams: any[] }) => {
                   Graphique de Progression
                 </h3>
                 <p className='text-sm text-muted-foreground'>
-                  Mise à jour toutes les 2 secondes
+                  Mise à jour toutes les {REFRESH_DURATION} secondes
                 </p>
               </div>
 

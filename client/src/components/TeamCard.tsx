@@ -30,7 +30,7 @@ const TeamCard = ({ team, index }: TeamCardProps) => {
     };
 
     fetchTeamMembers();
-  }, [team.id]);
+  }, []);
 
   return (
     <article

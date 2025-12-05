@@ -27,9 +27,7 @@ const Home = () => {
     const loadTeams = async () => {
       try {
         // Only show loading spinner on initial load
-        if (isInitialLoad) {
-          setIsLoading(true);
-        }
+        setIsLoading(true);
 
         const data = await fetchTeams();
         setTeams(data);
@@ -49,9 +47,7 @@ const Home = () => {
         );
         console.error('Failed to fetch teams:', err);
       } finally {
-        if (isInitialLoad) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
@@ -112,6 +108,9 @@ const Home = () => {
       clearInterval(refreshInterval);
     };
   }, []);
+  useEffect(() => {
+    console.log({ isInitialLoad });
+  }, [isInitialLoad]);
 
   const filteredTeams = teams.filter((team) =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -246,7 +245,7 @@ const Home = () => {
             </div>
           </div>
 
-          {isLoading ? (
+          {isLoading && isInitialLoad ? (
             <div className='text-center py-12'>
               <div
                 className='inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin'
