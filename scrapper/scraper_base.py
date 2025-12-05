@@ -30,7 +30,7 @@ class WebScraper:
         self.session.headers.update({
             'User-Agent': os.getenv('USER_AGENT', 'Mozilla/5.0')
         })
-        self.timeout = int(os.getenv('REQUEST_TIMEOUT', 30))
+        self.timeout = int(os.getenv('REQUEST_TIMEOUT', 10))
         self.max_retries = int(os.getenv('MAX_RETRIES', 3))
     
     def fetch_page(self, url: str) -> Optional[str]:
