@@ -39,7 +39,7 @@ Before you begin, ensure you have the following installed:
 ---
 
 ## Backend Setup (Scraper)
-
+#### Make sure you have python installed and its version == 3.10.10
 ### 1. Navigate to the Scraper Directory
 
 ```bash
